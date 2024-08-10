@@ -34,9 +34,9 @@ class PaymentConstroller extends Controller
     }
 
     public function store(Request $request){
-        $routeName = $request->route()->getName();
+        $routeName = explode('.',$request->route()->getName())[2];
         switch($routeName){
-            case "api.payment.add":
+            case "add":
                 $validated = Validator::make($request->all(),[
                     'proof_image' => 'required|image|mimes:jpeg,png,jpg,svg|max:2048',
                     'id' => 'required|numeric|min:0',
@@ -61,7 +61,7 @@ class PaymentConstroller extends Controller
                 } else {
                     return response()->json(['message' => 'File upload failed','type' => 'error'], 500);
                 }
-            case 'api.payment.delete':
+            case 'delete':
                 $payment = Payment::find($request->get('id'));
                 if($payment === null){
                     return response()->json(["type" => "error","message" => "Data Pembayaran Tidak Ditemukan"]);
@@ -72,6 +72,9 @@ class PaymentConstroller extends Controller
                 }
                 $payment->delete();
                 return response()->json(["type" => "success","message" => "Pembayaran Berhasil di Hapus"]);
+            default:
+                return response()->json(["type" => "error","message" => "Invalid Action"]);
+
         }
     }
 }
