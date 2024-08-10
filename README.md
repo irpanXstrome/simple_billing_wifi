@@ -12,7 +12,7 @@ This project is a simple WiFi billing monitor designed to track and manage inter
 
 ## Frameworks and Tools
 - **Backend:** Laravel
-- **Frontend:** Tailwind CSS, with frontend implementation supported by @dzulkipli.
+- **Frontend:** Tailwind CSS, with frontend implementation supported by [Dzulkipli](https://github.com/kiplinyu)
 
 ## How to Use
 1. Clone the repository.
@@ -27,7 +27,8 @@ git clone https://github.com/your-repo/wifi-billing-monitor.git
 cd wifi-billing-monitor
 composer install
 npm install
-php artisan migrate
+php artisan migrate:fresh --seed
+php artisan storage:link
 php artisan serve
 ```
 
