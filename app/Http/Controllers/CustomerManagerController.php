@@ -46,9 +46,10 @@ class CustomerManagerController extends Controller
 
     public function store(Request $request)
     {
-        switch (($reqName = $request->route()->getName())) {
-            case 'api.customer.add':
-            case 'api.customer.edit':
+        $reqName = explode('.',$request->route()->getName())[2];
+        switch ($reqName) {
+            case 'add':
+            case 'edit':
                 $validated = $request->validate([
                     'name' => 'required|min:3|max:255',
                     'phone' => 'required|min:10|max:20',
@@ -59,7 +60,7 @@ class CustomerManagerController extends Controller
                     'expired' => 'required|date_format:Y-m-d',
                     'status' => 'required|numeric'
                 ]);
-                if(str_contains($reqName,'edit')){
+                if($reqName === 'edit'){
                     $request->validate([
                         'id' => 'required|numeric|min:0',
                     ]);
@@ -67,16 +68,15 @@ class CustomerManagerController extends Controller
                     $customer = Customer::find($request->get('id'));
                     $customer->billing?->update($validated);
                     $customer->update($validated);
-                    $customer->save();
-                    $customer->billing?->save();
                 }else{
                     $subId = Subscription::create($validated)->id;
                     $customer = Customer::create($validated);
                     $customer->subscription_id = $subId;
-                    $customer->save();
                 }
+                $customer->billing?->save();
+                $customer->save();
                 return redirect(route('customer.list'))->with(['message' => 'Customer Berhasil di Simpan']);
-            case 'api.customer.remove':
+            case 'remove':
                 $validated = $request->validate([
                     'id' => 'required|min:0',
                 ]);
