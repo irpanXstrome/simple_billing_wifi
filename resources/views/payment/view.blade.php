@@ -8,7 +8,7 @@
         'resources/css/output.css',
         'resources/js/app.js',
     ])
-    <title>Edit Data</title>
+    <title>Payment Data</title>
 </head>
 <body>
 <div class="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
@@ -29,7 +29,7 @@
                     Kembali
                 </a>
 
-                <button class="openModalButton inline-block rounded border border-cyan-500 bg-cyan-500 px-12 py-3 text-sm font-medium text-white hover:bg-transparent hover:bg-white hover:text-cyan-500 focus:outline-none shadow-sm  shadow-slate-400">
+                <button class="openAddModalButton inline-block rounded border border-cyan-500 bg-cyan-500 px-12 py-3 text-sm font-medium text-white hover:bg-transparent hover:bg-white hover:text-cyan-500 focus:outline-none shadow-sm  shadow-slate-400">
                     Tambah
                 </button>
 
@@ -65,19 +65,14 @@
                                 </button>
                             </td>
                             <td class="whitespace-nowrap px-4 py-2 flex items-center gap-2">
-                                <button>
-                                    <a class="group relative inline-block overflow-hidden rounded-md border border-[#399918] px-3 py-1  focus:outline-none"
-                                       href="RincianEdit.html">
-                                    <span
-                                        class="absolute inset-y-0 left-0 w-[0px] bg-[#399918] transition-all group-hover:w-full group-active:bg-[#399918]"
+                                <button payment-id="{{$payment->id}}" class="openEditModalButton group relative inline-block overflow-hidden rounded-md border border-[#399918] px-3 py-1  focus:outline-none">
+                                    <span class="absolute inset-y-0 left-0 w-[0px] bg-[#399918] transition-all group-hover:w-full group-active:bg-[#399918]"
                                     ></span>
-
                                         <span
                                             class="relative text-sm font-medium text-black transition-colors group-hover:text-white"
                                         >
                                         Edit
                                     </span>
-                                    </a>
                                 </button>
 
                                 <button data-id="{{$payment->id}}" class="paymentDeleteButton group relative inline-block overflow-hidden rounded-md border border-[#F5004F] px-3 py-1  focus:outline-none">
@@ -106,7 +101,7 @@
 
 
 <!-- Modal structure -->
-<div id="formModal" class="fixed inset-0 hidden bg-gray-900 bg-opacity-50 flex items-center justify-center">
+<div id="formModal" modal-type="" data-id="" class="fixed inset-0 hidden bg-gray-900 bg-opacity-50 flex items-center justify-center">
     <div class="bg-white rounded-lg p-6 shadow-xl w-full max-w-lg">
         <!-- Close button -->
         <button class="closeModalButton text-gray-500 hover:text-gray-700 float-right">
@@ -152,7 +147,7 @@
                     <span
                         class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-white p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
                     >
-            Total Harga
+            Total Bayar
         </span>
                 </label>
             </div>
@@ -179,7 +174,7 @@
                             />
                         </svg>
                         <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                        <p class="text-xs text-gray-500">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                        <p id="info-placeholder"class="text-xs text-gray-500">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
 
                         <p id="file-name" class="text-sm text-gray-500 mt-2"></p>
                     </div>
@@ -197,7 +192,7 @@
                     type="submit"
                     class="block w-full rounded border border-[#399918] bg-[#399918] px-12 py-3 text-sm font-medium text-white hover:bg-transparent hover:text-[#399918] focus:outline-none shadow-sm shadow-slate-400"
                 >
-                    Tambah
+                    Simpan
                 </button>
             </div>
         </form>
@@ -282,11 +277,19 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
-        const openModalButton = document.querySelector('.openModalButton');
+        const openEditModalButton = document.querySelector('.openEditModalButton');
+        const openAddModalButton = document.querySelector('.openAddModalButton');
         const closeModalButtons = document.querySelectorAll('.closeModalButton');
         const modal = document.getElementById('formModal');
 
-        openModalButton.addEventListener('click', function () {
+        openAddModalButton.addEventListener('click', function () {
+            modal.setAttribute('modal-type', 'add');
+            modal.classList.remove('hidden');
+        });
+
+        openEditModalButton.addEventListener('click', function () {
+            modal.setAttribute('modal-type', 'edit');
+            modal.setAttribute('data-id', openEditModalButton.getAttribute('payment-id'));
             modal.classList.remove('hidden');
         });
 
@@ -309,11 +312,15 @@
         }
     });
 
+    // Add Payment Method
     document.getElementById('addUserForm').addEventListener('submit', async function (event) {
         event.preventDefault();
 
+        const modal = document.getElementById('formModal');
         const formData = new FormData(this);
-        formData.append('id', {{$customer->id}});
+        console.log(modal.getAttribute('modal-type'));
+        const isEdit = modal.getAttribute('modal-type') == 'edit';
+        formData.append('id', !isEdit ? {{$customer->id}} : modal.getAttribute('data-id'));
         Swal.fire({
             title: 'Processing...',
             text: 'Please wait while we process your request',
@@ -325,8 +332,12 @@
                 Swal.showLoading(); // Show loading spinner
             }
         });
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+        const api = !isEdit ? '/api/payment/add' : '/api/payment/edit';
         try {
-            const response = await fetch('/api/payment/add', {
+            const response = await fetch(api, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{csrf_token()}}'

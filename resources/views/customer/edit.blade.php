@@ -207,7 +207,7 @@
             </div>
 
             <div class="flex space-x-4">
-                <a href="Pengguna.html"
+                <a href="{{route('default')}}"
                    class="inline-block rounded border border-[#F5004F] bg-[#F5004F] px-12 py-3 text-sm font-medium text-white text hover:bg-transparent hover:text-[#F5004F] focus:outline-none shadow-sm shadow-slate-400"
                 >
                     Kembali

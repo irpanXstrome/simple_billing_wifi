@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 //Dashboard
 
-Route::redirect('/','/dashboard');
+Route::redirect('/','/dashboard')->name('default');
 Route::get('/dashboard', [DasboardController::class,'view'])->name('dashboard');
 Route::get('/customers', [CustomerManagerController::class,'view'])->name('customer.list');
 Route::get('/customers/add', [CustomerManagerController::class,'view'])->name('customer.add');
@@ -25,12 +25,12 @@ Route::prefix('/api')->group(function (){
     Route::post('/test',[TesterController::class,'mainPost']);
     //PROD
     Route::post('/customers/add',[CustomerManagerController::class,'store'])->name('api.customer.add');
-    Route::post('/customers/add',[CustomerManagerController::class,'store'])->name('api.customer.add');
     Route::post('/customers/edit',[CustomerManagerController::class,'store'])->name('api.customer.edit');
     Route::post('/customers/remove',[CustomerManagerController::class,'store'])->name('api.customer.remove');
     Route::post('/customers/remove/en',[CustomerManagerController::class,'store'])->name('api.customer.remove.encrypt');
 
     Route::post('/payment/add',[PaymentConstroller::class,'store'])->name('api.payment.add');
+    Route::post('/payment/edit',[PaymentConstroller::class,'store'])->name('api.payment.edit');
     Route::post('/payment/delete',[PaymentConstroller::class,'store'])->name('api.payment.delete');
     // END
 
